@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dress Up & Avatar Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .header {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .money-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            background-color: #e1f5fe;
+            color: #0288d1;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #0288d1;
+        }
+
+        .badge {
+            display: none;
+            background-color: #1da1f2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .avatar-stage {
+            width: 250px;
+            height: 350px;
+            background-color: #fff0f5;
+            border: 3px solid #ffb6c1;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .character-head {
+            width: 60px;
+            height: 60px;
+            background-color: #ffdbac;
+            border-radius: 50%;
+            position: absolute;
+            top: 60px;
+            z-index: 2;
+        }
+
+        .character-body {
+            width: 50px;
+            height: 90px;
+            background-color: #ffdbac;
+            position: absolute;
+            top: 120px;
+            border-radius: 10px;
+            z-index: 1;
+        }
+
+        .character-feet {
+            width: 60px;
+            height: 20px;
+            position: absolute;
+            top: 210px;
+            z-index: 1;
+        }
+
+        #equipped-hat {
+            position: absolute;
+            top: 30px;
+            font-size: 45px;
+            z-index: 4;
+        }
+
+        #equipped-dress {
+            position: absolute;
+            top: 110px;
+            font-size: 65px;
+            z-index: 3;
+        }
+
+        #equipped-shoes {
+            position: absolute;
+            top: 200px;
+            font-size: 35px;
+            z-index: 3;
+        }
+
+        .wardrobe {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .category-title {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .item-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .item-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .item-btn:hover {
+            border-color: #ff69b4;
+            transform: translateY(-2px);
+        }
+
+        .item-price {
+            font-size: 0.75rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .owner-section {
+            margin-top: 20px;
+        }
+
+        .owner-btn {
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .owner-btn:hover {
+            background-color: #5b4bc4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="money-display" id="money-display">Coins: $100</div>
+        <div class="badge" id="owner-badge">✔ Verified Owner</div>
+    </div>
+
+    <div class="game-container">
+        <div class="avatar-stage">
+            <div id="equipped-hat"></div>
+            <div class="character-head"></div>
+            <div id="equipped-dress"></div>
+            <div class="character-body"></div>
+            <div id="equipped-shoes"></div>
+            <div class="character-feet"></div>
+        </div>
+
+        <div class="wardrobe">
+            <h3 class="category-title">Hats</h3>
+            <div class="item-grid" id="hats-container"></div>
+
+            <h3 class="category-title">Dresses & Tops</h3>
+            <div class="item-grid" id="dresses-container"></div>
+
+            <h3 class="category-title">Shoes</h3>
+            <div class="item-grid" id="shoes-container"></div>
+
+            <div class="owner-section">
+                <button class="owner-btn" onclick="openOwnerPanel()">Owner Access</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let playerMoney = 100;
+        let isOwner = false;
+
+        const items = {
+            hats: [
+                { id: 'h1', icon: '👑', price: 50, symbol: '👑' },
+                { id: 'h2', icon: '🎩', price: 30, symbol: '🎩' },
+                { id: 'h3', icon: '🧢', price: 15, symbol: '🧢' },
+                { id: 'h4', icon: '🎓', price: 40, symbol: '🎓' }
+            ],
+            dresses: [
+                { id: 'd1', icon: '👗', price: 60, symbol: '👗' },
+                { id: 'd2', icon: '👔', price: 40, symbol: '👔' },
+                { id: 'd3', icon: '🥼', price: 45, symbol: '🥼' },
+                { id: 'd4', icon: '🥋', price: 50, symbol: '🥋' }
+            ],
+            shoes: [
+                { id: 's1', icon: '👠', price: 40, symbol: '👠' },
+                { id: 's2', icon: '👟', price: 25, symbol: '👟' },
+                { id: 's3', icon: '🥾', price: 35, symbol: '🥾' },
+                { id: 's4', icon: '🩴', price: 10, symbol: '🩴' }
+            ]
+        };
+
+        const purchasedItems = new Set();
+
+        function renderItems(category, containerId, targetElementId) {
+            const container = document.getElementById(containerId);
+            items[category].forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'item-btn';
+                btn.innerHTML = `<span>${item.icon}</span><span class="item-price" id="price-${item.id}">$${item.price}</span>`;
+                btn.onclick = () => tryEquipOrBuy(item, targetElementId);
+                container.appendChild(btn);
+            });
+        }
+
+        function tryEquipOrBuy(item, targetElementId) {
+            if (purchasedItems.has(item.id) || isOwner) {
+                document.getElementById(targetElementId).innerText = item.symbol;
+            } else if (playerMoney >= item.price) {
+                playerMoney -= item.price;
+                purchasedItems.add(item.id);
+                document.getElementById(`price-${item.id}`).innerText = 'Owned';
+                document.getElementById(`price-${item.id}`).style.color = '#888';
+                updateMoneyDisplay();
+                document.getElementById(targetElementId).innerText = item.symbol;
+            } else {
+                alert("You don't have enough coins!");
+            }
+        }
+
+        function updateMoneyDisplay() {
+            const moneyDisplay = document.getElementById('money-display');
+            if (isOwner) {
+                moneyDisplay.innerText = "Coins: ∞ (Unlimited)";
+            } else {
+                moneyDisplay.innerText = `Coins: $${playerMoney}`;
+            }
+        }
+
+        function openOwnerPanel() {
+            const codeInput = prompt("Enter the secret Owner Code:");
+            if (codeInput === "1010") {
+                isOwner = true;
+                updateMoneyDisplay();
+                document.getElementById('owner-badge').style.display = 'flex';
+                alert("Access Granted! You now have Unlimited Money and the Verification Badge!");
+            } else {
+                alert("Incorrect code!");
+            }
+        }
+
+        renderItems('hats', 'hats-container', 'equipped-hat');
+        renderItems('dresses', 'dresses-container', 'equipped-dress');
+        renderItems('shoes', 'shoes-container', 'equipped-shoes');
+    </script>
+</body>
+</html>
